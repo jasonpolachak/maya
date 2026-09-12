@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3efe6">
+  <meta name="description" content="Maya — personal Counsel. Paste a message, get a reply that lands your point without one-upping. Runs only on this device.">
+  <title>Maya</title>
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --paper: #fbf8f1;
+      --ink: #2a2722;
+      --muted: #6d675e;
+      --line: #ddd6c7;
+      --sage: #3e5a4c;
+      --sage-soft: #e6eee8;
+      --card: #fffdf8;
+      --warn: #7a4e32;
+      --focus: #3e5a4c;
+      --shadow: 0 1px 0 rgba(42, 39, 34, 0.04), 0 10px 28px rgba(42, 39, 34, 0.05);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    body {
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+      line-height: 1.5;
+      padding: 1.25rem 1.1rem 2.5rem;
+    }
+
+    .wrap {
+      max-width: 36rem;
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 0.4rem 0 1.35rem;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 1.35rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      margin: 0 0 0.2rem;
+    }
+
+    .lede {
+      margin: 0;
+      color: var(--muted);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 0.92rem;
+    }
+
+    .privacy {
+      margin: 0.85rem 0 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    label {
+      display: block;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin: 0 0 0.45rem;
+    }
+
+    .hint {
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    textarea {
+      width: 100%;
+      display: block;
+      resize: vertical;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 0.85rem 0.9rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 1rem;
+      line-height: 1.45;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    textarea:focus {
+      outline: 2px solid var(--focus);
+      outline-offset: 1px;
+    }
+
+    #incoming { min-height: 10.5rem; }
+    #point { min-height: 4.4rem; }
+
+    .field { margin-bottom: 1.05rem; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.7rem 1rem;
+      margin: 0.2rem 0 0.4rem;
+    }
+
+    button {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 1rem;
+      border: 0;
+      cursor: pointer;
+    }
+
+    #analyze {
+      background: var(--sage);
+      color: #f7f4ee;
+      padding: 0.78rem 1.25rem;
+      border-radius: 999px;
+      min-height: 2.75rem;
+      min-width: 8.5rem;
+    }
+
+    #analyze:hover { filter: brightness(1.06); }
+    #analyze:active { transform: translateY(1px); }
+
+    .ghost {
+      background: transparent;
+      color: var(--sage);
+      padding: 0.4rem 0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-size: 0.9rem;
+    }
+
+    .err {
+      display: none;
+      margin: 0.7rem 0 0;
+      color: var(--warn);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 0.9rem;
+    }
+
+    .err.show { display: block; }
+
+    #results {
+      display: none;
+      margin-top: 1.5rem;
+    }
+
+    #results.show { display: block; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem 1.05rem 1.05rem;
+      margin-bottom: 0.85rem;
+      box-shadow: var(--shadow);
+    }
+
+    .card.primary {
+      border-color: #cfdccf;
+      background: #f7faf6;
+    }
+
+    .card h2 {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin: 0 0 0.55rem;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .copy {
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.8rem;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .body-text {
+      margin: 0;
+      font-size: 1.05rem;
+      white-space: pre-wrap;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0 0 0.7rem;
+    }
+
+    .chip {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 0.75rem;
+      color: var(--sage);
+      background: var(--sage-soft);
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+    }
+
+    .consider li {
+      margin: 0 0 0.45rem;
+    }
+
+    .consider {
+      margin: 0;
+      padding-left: 1.15rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 0.95rem;
+      color: #3a372f;
+    }
+
+    footer {
+      margin-top: 1.75rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 0.76rem;
+      line-height: 1.55;
+    }
+
+    footer a { color: var(--sage); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Maya</h1>
+      <p class="lede">Counsel · slice 1. Paste a message. Land your point without one-upping.</p>
+      <p class="privacy">Private: analyzed only in this browser. Nothing is sent anywhere. No accounts, no keys, no server.</p>
+    </header>
+
+    <form id="form" novalidate>
+      <div class="field">
+        <label for="incoming">Incoming message</label>
+        <textarea id="incoming" name="incoming" autocomplete="off" placeholder="Paste the text you just received."></textarea>
+      </div>
+      <div class="field">
+        <label for="point">The point I want to make <span class="hint">(optional)</span></label>
+        <textarea id="point" name="point" autocomplete="off" placeholder="One thing you need her to hear — a fact, a need, a boundary."></textarea>
+      </div>
+      <div class="actions">
+        <button type="submit" id="analyze">Analyze</button>
+        <button type="button" class="ghost" id="example">Use an example</button>
+      </div>
+      <p class="err" id="err" role="alert">Paste an incoming message first.</p>
+    </form>
+
+    <section id="results" aria-live="polite">
+      <article class="card primary">
+        <div class="card-head">
+          <h2>Recommendation</h2>
+          <button type="button" class="copy" id="copy">Copy reply</button>
+        </div>
+        <p class="body-text" id="recommendation"></p>
+      </article>
+      <article class="card">
+        <h2>Understanding</h2>
+        <div class="chips" id="chips"></div>
+        <p class="body-text" id="understanding"></p>
+      </article>
+      <article class="card">
+        <h2>Things to consider</h2>
+        <ul class="consider" id="consider"></ul>
+      </article>
+    </section>
+
+    <footer>
+      Heuristic coaching, not therapy. Maya tags likely conversation moves; it does not diagnose and does not name attachment styles.
+      Grounded in Gottman’s
+      <a href="https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/" rel="noopener">Four Horsemen</a>
+      (criticism, contempt, defensiveness, stonewalling)
+      and EFT-style
+      <a href="https://iceeft.com/what-is-eft/" rel="noopener">protest over not being gotten</a>.
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var EXAMPLE = "I do everything with the kids and you never help. You always have something more important. Do you even notice, or am I just supposed to keep carrying this alone?";
+
+      var RULES = [
+        { id: "criticism", label: "criticism", re: /\byou always\b/i, note: "global “always”" },
+        { id: "criticism", label: "criticism", re: /\byou never\b/i, note: "global “never”" },
+        { id: "criticism", label: "criticism", re: /\byou don'?t ever\b/i, note: "global “don’t ever”" },
+        { id: "criticism", label: "criticism", re: /\bwhy (?:do|can'?t) you (?:always|ever|just)\b/i, note: "why-you" },
+        { id: "criticism", label: "criticism", re: /\bwhat'?s wrong with you\b/i, note: "what’s wrong with you" },
+        { id: "criticism", label: "criticism", re: /\byou(?:'re| are) so (?:lazy|selfish|useless|careless|impossible|unreliable|thoughtless)\b/i, note: "character attack" },
+        { id: "criticism", label: "criticism", re: /\byou(?:'re| are) (?:lazy|selfish|useless|the problem|the worst)\b/i, note: "character attack" },
+        { id: "contempt", label: "contempt", re: /\b(?:how )?(?:pathetic|ridiculous|pitiful)\b/i, note: "scorn" },
+        { id: "contempt", label: "contempt", re: /\b(?:wow|typical|obviously|of course you)\b/i, note: "superiority / sarcasm" },
+        { id: "contempt", label: "contempt", re: /\bcongratulations\b/i, note: "sarcasm" },
+        { id: "contempt", label: "contempt", re: /\bnice job\b/i, note: "possible sarcasm" },
+        { id: "contempt", label: "contempt", re: /\bgrow up\b/i, note: "put-down" },
+        { id: "contempt", label: "contempt", re: /\bmust be nice\b/i, note: "superiority" },
+        { id: "defensiveness", label: "defensiveness", re: /\bit'?s not my fault\b/i, note: "not my fault" },
+        { id: "defensiveness", label: "defensiveness", re: /\byou(?:'re| are) the one\b/i, note: "reverse blame" },
+        { id: "defensiveness", label: "defensiveness", re: /\bi never said\b/i, note: "deny / reverse" },
+        { id: "defensiveness", label: "defensiveness", re: /\bthat'?s not (?:true|what happened|fair)\b/i, note: "counter-charge" },
+        { id: "defensiveness", label: "defensiveness", re: /\bi was just\b/i, note: "excuse-first" },
+        { id: "stonewalling", label: "stonewalling", re: /\bi don'?t (?:want to|wanna) (?:talk|do this|hear (?:this|it))\b/i, note: "shut-down" },
+        { id: "stonewalling", label: "stonewalling", re: /\bi'?m done\b/i, note: "I’m done" },
+        { id: "stonewalling", label: "stonewalling", re: /\bleave me alone\b/i, note: "leave me alone" },
+        { id: "stonewalling", label: "stonewalling", re: /\b(?:forget it|do what you want|talk to the hand)\b/i, note: "dismissal" },
+        { id: "stonewalling", label: "stonewalling", re: /^(?:k|kk|whatever|fine|ok|okay)\.?$/i, note: "cutoff reply" },
+        { id: "protest", label: "protest (not being gotten)", re: /\bdo you even (?:care|listen|notice|see|get)\b/i, note: "do you even…" },
+        { id: "protest", label: "protest (not being gotten)", re: /\byou don'?t (?:listen|care|get it|understand|see|notice)\b/i, note: "you don’t get it" },
+        { id: "protest", label: "protest (not being gotten)", re: /\bi feel (?:invisible|alone|ignored|unheard|unseen|crazy)\b/i, note: "unseen / unheard" },
+        { id: "protest", label: "protest (not being gotten)", re: /\bi'?m (?:tired|sick) of\b/i, note: "exhausted reach" },
+        { id: "protest", label: "protest (not being gotten)", re: /\bi (?:do|handle|carry|manage) everything\b/i, note: "carrying it alone" },
+        { id: "protest", label: "protest (not being gotten)", re: /\b(?:all on me|by myself|on my own)\b/i, note: "alone in the load" },
+        { id: "protest", label: "protest (not being gotten)", re: /\bam i (?:crazy|the only one)\b/i, note: "am I the only one" },
+        { id: "protest", label: "protest (not being gotten)", re: /\bi needed you\b/i, note: "I needed you" }
+      ];
+
+      var form = document.getElementById("form");
+      var incomingEl = document.getElementById("incoming");
+      var pointEl = document.getElementById("point");
+      var errEl = document.getElementById("err");
+      var resultsEl = document.getElementById("results");
+      var recEl = document.getElementById("recommendation");
+      var undEl = document.getElementById("understanding");
+      var chipsEl = document.getElementById("chips");
+      var considerEl = document.getElementById("consider");
+      var copyBtn = document.getElementById("copy");
+
+      document.getElementById("example").addEventListener("click", function () {
+        incomingEl.value = EXAMPLE;
+        if (!pointEl.value.trim()) {
+          pointEl.value = "I did put them to bed Tuesday. I was working late the other nights.";
+        }
+        incomingEl.focus();
+      });
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var incoming = incomingEl.value.trim();
+        if (!incoming) {
+          errEl.classList.add("show");
+          resultsEl.classList.remove("show");
+          incomingEl.focus();
+          return;
+        }
+        errEl.classList.remove("show");
+        render(analyze(incoming, pointEl.value.trim()));
+      });
+
+      copyBtn.addEventListener("click", function () {
+        var text = recEl.textContent || "";
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            copyBtn.textContent = "Copied";
+            setTimeout(function () { copyBtn.textContent = "Copy reply"; }, 1400);
+          }).catch(fallbackCopy);
+        } else {
+          fallbackCopy();
+        }
+        function fallbackCopy() {
+          var tmp = document.createElement("textarea");
+          tmp.value = text;
+          document.body.appendChild(tmp);
+          tmp.select();
+          try { document.execCommand("copy"); } catch (err) {}
+          document.body.removeChild(tmp);
+          copyBtn.textContent = "Copied";
+          setTimeout(function () { copyBtn.textContent = "Copy reply"; }, 1400);
+        }
+      });
+
+      function analyze(incoming, point) {
+        var hits = tag(incoming);
+        var ids = unique(hits.map(function (h) { return h.id; }));
+        return {
+          recommendation: buildRecommendation(incoming, point, ids),
+          understanding: buildUnderstanding(incoming, hits, ids),
+          chips: chipLabels(hits),
+          consider: buildConsider(ids, point)
+        };
+      }
+
+      function tag(text) {
+        var hits = [];
+        for (var i = 0; i < RULES.length; i++) {
+          var rule = RULES[i];
+          if (rule.re.test(text)) hits.push({ id: rule.id, label: rule.label, note: rule.note });
+        }
+        return hits;
+      }
+
+      function unique(arr) {
+        var out = [];
+        for (var i = 0; i < arr.length; i++) {
+          if (out.indexOf(arr[i]) === -1) out.push(arr[i]);
+        }
+        return out;
+      }
+
+      function chipLabels(hits) {
+        var seen = {};
+        var labels = [];
+        for (var i = 0; i < hits.length; i++) {
+          if (!seen[hits[i].label]) {
+            seen[hits[i].label] = true;
+            labels.push(hits[i].label);
+          }
+        }
+        if (!labels.length) labels.push("no strong horsemen markers");
+        return labels;
+      }
+
+      function extractClause(text, re) {
+        var m = text.match(re);
+        if (!m) return "";
+        return tidy(m[1] || "");
+      }
+
+      function tidy(s) {
+        return s.replace(/\s+/g, " ").replace(/[“”]/g, "\"").trim();
+      }
+
+      function loadPhrase(text) {
+        if (/\b(?:kids|children|bedtime|school)\b/i.test(text)) return "the kids and the daily load";
+        if (/\b(?:house|dishes|laundry|chores)\b/i.test(text)) return "the house and the chores";
+        if (/\bi (?:do|handle|carry|manage) everything\b/i.test(text) || /\b(?:all on me|by myself|on my own)\b/i.test(text)) {
+          return "this alone";
+        }
+        var never = extractClause(text, /\byou never\s+([^.,!?]+)/i);
+        if (never) {
+          if (/^(help|show up|listen)\b/i.test(never)) return "this without enough help";
+          return never;
+        }
+        var always = extractClause(text, /\byou always\s+([^.,!?]+)/i);
+        if (always) return always;
+        if (/\b(?:listen|hear me|talk)\b/i.test(text)) return "the need to be heard";
+        return "what you’ve been carrying";
+      }
+
+      function cleanPoint(point) {
+        var p = tidy(point);
+        p = p.replace(/^(but|however|well,)\s+/i, "");
+        p = p.replace(/\s+/g, " ");
+        if (!/[.!?]$/.test(p)) p += ".";
+        return p;
+      }
+
+      function buildRecommendation(incoming, point, ids) {
+        var load = loadPhrase(incoming);
+        var parts = [];
+
+        if (ids.indexOf("stonewalling") !== -1 && incoming.length < 80) {
+          parts.push("I hear you stepping back. I don’t want to crowd that.");
+        } else if (ids.indexOf("contempt") !== -1) {
+          parts.push("I can hear how sharp this has gotten, and that you’re not feeling gotten.");
+        } else if (ids.indexOf("criticism") !== -1 || ids.indexOf("protest") !== -1) {
+          parts.push("I hear you — it feels like you’re carrying " + load + ", and I’m not really seeing it.");
+        } else if (ids.indexOf("defensiveness") !== -1) {
+          parts.push("I’m not trying to win this. I want to understand what landed wrong.");
+        } else {
+          parts.push("I want to make sure I’m getting what you’re actually asking for.");
+        }
+
+        if (ids.indexOf("protest") !== -1 && ids.indexOf("stonewalling") === -1) {
+          parts.push("That matters to me. I’m not arguing the always/never — I hear the bid: don’t leave me alone in this.");
+        } else if (ids.indexOf("criticism") !== -1) {
+          parts.push("I’m taking the weight you’re naming, not debating your wording.");
+        }
+
+        if (point) {
+          parts.push("The thing I don’t want to lose: " + cleanPoint(point) + " I’m saying that as information, not a scoreboard.");
+        }
+
+        if (ids.indexOf("stonewalling") !== -1 && incoming.length < 80) {
+          parts.push("I’m here when you want to pick it back up.");
+        } else if (ids.indexOf("contempt") !== -1) {
+          parts.push("Did I get the part that actually hurts, or did I miss it?");
+        } else if (ids.indexOf("criticism") !== -1 || ids.indexOf("protest") !== -1) {
+          parts.push("What would help tonight, specifically?");
+        } else {
+          parts.push("Tell me if I’m close.");
+        }
+
+        return parts.join(" ");
+      }
+
+      function notesFor(hits, id) {
+        var notes = [];
+        for (var i = 0; i < hits.length; i++) {
+          if (hits[i].id === id && notes.indexOf(hits[i].note) === -1) notes.push(hits[i].note);
+        }
+        return notes;
+      }
+
+      function buildUnderstanding(incoming, hits, ids) {
+        var bits = [];
+        if (ids.indexOf("criticism") !== -1) {
+          bits.push("Gottman criticism: a global charge (" + notesFor(hits, "criticism").join(", ") + ") rather than a specific request.");
+        }
+        if (ids.indexOf("contempt") !== -1) {
+          bits.push("Gottman contempt: superiority, sarcasm, or scorn (" + notesFor(hits, "contempt").join(", ") + "). That’s heat, not a diagnosis.");
+        }
+        if (ids.indexOf("defensiveness") !== -1) {
+          bits.push("Gottman defensiveness: excuse, deny, or reverse-blame (" + notesFor(hits, "defensiveness").join(", ") + "). Meeting it with a counter-case usually tightens the loop.");
+        }
+        if (ids.indexOf("stonewalling") !== -1) {
+          bits.push("Gottman stonewalling: withdrawal / cutoff (" + notesFor(hits, "stonewalling").join(", ") + "). It can be “I’m flooded,” not “I don’t care.”");
+        }
+        if (ids.indexOf("protest") !== -1) {
+          bits.push("EFT-style protest over not being gotten (" + notesFor(hits, "protest").join(", ") + "): a reach that can sound like attack. What she may actually be asking for is to feel seen in the load — “do you get what this is like for me?”");
+        }
+        if (!bits.length) {
+          bits.push("No strong Four Horsemen markers jumped out. Treat the text as a bid for understanding first. Land your point as information, not a rebuttal.");
+        } else if (ids.indexOf("protest") === -1 && (ids.indexOf("criticism") !== -1 || ids.indexOf("contempt") !== -1)) {
+          bits.push("Even without explicit “do you even care” language, the cycle move is often protest: the charge is the volume; the ask is to be gotten.");
+        }
+        if (incoming.length > 500) {
+          bits.push("Long message: answer the bid, not every clause.");
+        }
+        return bits.join(" ");
+      }
+
+      function buildConsider(ids, point) {
+        var items = [];
+        if (ids.indexOf("criticism") !== -1) {
+          items.push("Don’t try the always/never case. Reflect the load, then one fact if you need it.");
+        }
+        if (ids.indexOf("protest") !== -1) {
+          items.push("She’s likely asking “do you get me?” more than “who is right?”");
+        }
+        if (ids.indexOf("contempt") !== -1) {
+          items.push("Don’t match the sarcasm. Warm and short beats clever.");
+        }
+        if (ids.indexOf("defensiveness") !== -1) {
+          items.push("If you explain first, it will land as “you’re wrong.” Reflect first.");
+        }
+        if (ids.indexOf("stonewalling") !== -1) {
+          items.push("A short “I want this, I need a minute” is different from disappearing.");
+        }
+        if (point) {
+          items.push("Park your point after a reflection so it doesn’t land as a rebuttal or a one-up.");
+        }
+        items.push("Don’t one-up (“I have it harder”). That’s a new fight.");
+        if (items.length < 3) {
+          items.push("One concrete next step beats a paragraph of context.");
+        }
+        return items.slice(0, 4);
+      }
+
+      function render(out) {
+        recEl.textContent = out.recommendation;
+        undEl.textContent = out.understanding;
+        chipsEl.textContent = "";
+        for (var i = 0; i < out.chips.length; i++) {
+          var chip = document.createElement("span");
+          chip.className = "chip";
+          chip.textContent = out.chips[i];
+          chipsEl.appendChild(chip);
+        }
+        considerEl.textContent = "";
+        for (var j = 0; j < out.consider.length; j++) {
+          var li = document.createElement("li");
+          li.textContent = out.consider[j];
+          considerEl.appendChild(li);
+        }
+        resultsEl.classList.add("show");
+        copyBtn.textContent = "Copy reply";
+        resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    })();
+  </script>
+</body>
+</html>
