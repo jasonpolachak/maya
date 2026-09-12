@@ -448,13 +448,19 @@
       }
 
       function loadPhrase(text) {
-        var never = extractClause(text, /\byou never\s+([^.,!?]+)/i);
-        if (never) return never.replace(/^(help|show up|listen)\s+/i, "").trim() || never;
-        var always = extractClause(text, /\byou always\s+([^.,!?]+)/i);
-        if (always) return always;
         if (/\b(?:kids|children|bedtime|school)\b/i.test(text)) return "the kids and the daily load";
         if (/\b(?:house|dishes|laundry|chores)\b/i.test(text)) return "the house and the chores";
-        if (/\b(?:listen|hear me|talk)\b/i.test(text)) return "being heard";
+        if (/\bi (?:do|handle|carry|manage) everything\b/i.test(text) || /\b(?:all on me|by myself|on my own)\b/i.test(text)) {
+          return "this alone";
+        }
+        var never = extractClause(text, /\byou never\s+([^.,!?]+)/i);
+        if (never) {
+          if (/^(help|show up|listen)\b/i.test(never)) return "this without enough help";
+          return never;
+        }
+        var always = extractClause(text, /\byou always\s+([^.,!?]+)/i);
+        if (always) return always;
+        if (/\b(?:listen|hear me|talk)\b/i.test(text)) return "the need to be heard";
         return "what you’ve been carrying";
       }
 
@@ -475,7 +481,7 @@
         } else if (ids.indexOf("contempt") !== -1) {
           parts.push("I can hear how sharp this has gotten, and that you’re not feeling gotten.");
         } else if (ids.indexOf("criticism") !== -1 || ids.indexOf("protest") !== -1) {
-          parts.push("I hear you — it feels like " + load + " is on you, and I’m not really seeing it.");
+          parts.push("I hear you — it feels like you’re carrying " + load + ", and I’m not really seeing it.");
         } else if (ids.indexOf("defensiveness") !== -1) {
           parts.push("I’m not trying to win this. I want to understand what landed wrong.");
         } else {
